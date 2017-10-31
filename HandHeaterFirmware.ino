@@ -28,7 +28,7 @@
 #define FULL 3
 
 unsigned long previousMillis = 0;  
-int interval = 0;  
+int interval = 0;  // LED flash interval in milliseconds
 int ledState = LOW;   
 
 byte heater_state = OFF;
