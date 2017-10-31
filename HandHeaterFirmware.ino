@@ -23,8 +23,13 @@
 #define FAN          4
 
 #define OFF 0
-#define MID 1
-#define FULL 2
+#define LOWEST 1
+#define MID 2
+#define FULL 3
+
+unsigned long previousMillis = 0;  
+int interval = 0;  
+int ledState = LOW;   
 
 byte heater_state = OFF;
 byte last_button_state = 0;
@@ -49,11 +54,11 @@ void setup() {
 void loop() {
   // Check if the button has just been pressed
   byte button_state = digitalRead(BUTTON);
-  if((button_state == HIGH) && (last_button_state == LOW) && (millis() - last_button_press > 100))
+  if((button_state == HIGH) && (last_button_state == LOW) && (millis() - last_button_press > 200))
   {
     // We've detected a button press. Change state.
     heater_state++;
-    if(heater_state >=3) // If we've hit the end state, loop back to the start
+    if(heater_state >=4) // If we've hit the end state, loop back to the start
     {
       heater_state = 0;
     }
@@ -63,25 +68,49 @@ void loop() {
 
   switch(heater_state){
     case 0:
-      digitalWrite(STATUS_LED, LOW);
+      interval = 0;
+      //digitalWrite(STATUS_LED, LOW);
       digitalWrite(HEATER, LOW);
       digitalWrite(FAN, LOW);
       break;
     case 1:
-      analogWrite(STATUS_LED, 100);
-      digitalWrite(HEATER, HIGH);
-      analogWrite(FAN, 175);
+      interval = 200;
+      //analogWrite(STATUS_LED, 30);
+      analogWrite(HEATER, 100);
+      //digitalWrite(HEATER, HIGH);
+      analogWrite(FAN, 165);
       break;
     case 2:
+      interval = 50;
+      //analogWrite(STATUS_LED, 100);
+      analogWrite(HEATER, 170);
+      //digitalWrite(HEATER, HIGH);
+      analogWrite(FAN, 190);
+      break;
+    case 3:
       digitalWrite(STATUS_LED, HIGH);
       digitalWrite(HEATER, HIGH);
       digitalWrite(FAN, HIGH);
       break;
+            
+  }
+
+  //Led flasher
+  if ((millis() - previousMillis >= interval)&&(interval >0)) {
+    // save the last time you blinked the LED
+    previousMillis = millis();
+
+    // if the LED is off turn it on and vice-versa:
+    if (ledState == LOW) {
+      ledState = HIGH;
+    } else {
+      ledState = LOW;
+    }
+
+    // set the LED with the ledState of the variable:
+    digitalWrite(STATUS_LED, ledState);
+  }else if(interval == 0){
+    digitalWrite(STATUS_LED, LOW);
   }
   
-  /* digitalWrite(test_output, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(2000);                       // wait for a second
-  digitalWrite(test_output, LOW);    // turn the LED off by making the voltage LOW
-  delay(2000);                       // wait for a second
-  */
 }
